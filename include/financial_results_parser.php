@@ -211,17 +211,108 @@ function CurrentProductOperatingStatement($stringToProcess)
 
 function CurrentDivisionalOperatingStatement($stringToProcess)
 {
-	global $products,$newLine,$firm,$regions;
+	global $firmData,$divisionalSummary,$newLine,$firm,$regions;
 	$line = strtok($stringToProcess, $newLine);
 	$lineNumber = 0;
 
+	$linesWithSimilarLogic = array(
+		9
+		,10
+		,12
+		,13
+		,15
+		,16
+		,17
+		,18
+		,19
+		,20
+		,22
+		,25
+		,26
+		,27
+		,28
+		,29
+		,30
+		,31
+		,32
+		,33
+		,34
+		,35
+		,36
+		,37
+		,38
+		,39
+		,40
+		,41
+		,42
+		,44
+		,46
+		,47
+		,49
+	);
+	
+	$fieldNameLines = array(
+		'9' => 'sales_units',
+		'10' => 'unfilled_orders',
+		'12' => 'price',
+		'13' => 'dealer_rebates',
+		'15' => 'revenue',
+		'16' => 'product_costs',
+		'17' => 'rebates_offered',
+		'18' => 'sales_commissions',
+		'19' => 'transportation',
+		'20' => 'duties_tariffs',
+		'22' => 'cross_margin',
+		'25' => 'fixcost_administrat',
+		'26' => 'fixcost_advertising',
+		'27' => 'fixcost_consulting_fees',
+		'28' => 'fixcost_corporate_oh',
+		'29' => 'fixcost_depreciation',
+		'30' => 'fixcost_disposal_sales',
+		'31' => 'fixcost_energ_premiums',
+		'32' => 'fixcost_introductions',
+		'33' => 'fixcost_inventory_charg',
+		'34' => 'fixcost_market_research',
+		'35' => 'fixcost_prod_order_cost',
+		'36' => 'fixcost_promotion',
+		'37' => 'fixcost_reformulations',
+		'38' => 'fixcost_research_development',
+		'39' => 'fixcost_sales_expenses',
+		'40' => 'fixcost_sales_salaries',
+		'41' => 'fixcost_sales_oh',
+		'42' => 'total_fixed_costs',
+		'44' => 'operating_income',
+		'46' => 'non_operat_income',
+		'47' => 'less_taxes',
+		'49' => 'net_income'
+	);   
+	
 	while ($line !== false) {
 		$lineNumber++;
-		echo "Linea $lineNumber<br>\n";
+		// echo "Linea $lineNumber<br>\n";
+		
+		
+		if(in_array($lineNumber,$linesWithSimilarLogic))
+		{
+			$fieldName = $fieldNameLines[$lineNumber];
+			$lineValue = trim(substr($line,19,12));
+			$divisionalSummary[$fieldName] = $lineValue;
+			
+			if($lineNumber == 9)
+			{
+				$firmData['sales_units'] = $lineValue;
+			}
+			
+			if($lineNumber == 49)
+			{
+				$firmData['net_income'] = $lineValue;
+			}
+		}
+		
 		
 		$line = strtok( $newLine );
 		
-		echo $line;
+		// echo $line;
 	}
 
 }
@@ -233,7 +324,60 @@ function CumulativeDivisionalOperatingStatement($stringToProcess)
 
 function DivisionalBalanceSheet($stringToProcess)
 {
+	global $products,$firmData,$newLine,$firm,$regions;
+	$line = strtok($stringToProcess, $newLine);
+	$lineNumber = 0;
 	
+	while ($line !== false) {
+		$lineNumber++;
+		//echo "Linea $lineNumber<br>\n";
+		
+		if($lineNumber == 7)
+		{
+			$firmData['cash'] = trim(str_replace("CASH","",$line));
+		}
+		
+		if($lineNumber == 10)
+		{
+			$products['4-1']['stock'] = trim(substr($line,23,10));
+		}
+		
+		if($lineNumber == 11)
+		{
+			$products['4-2']['stock'] = trim(substr($line,23,10));
+		}
+		
+		if($lineNumber == 12)
+		{
+			$products['4-3']['stock'] = trim(substr($line,23,10));
+		}
+		
+		if($lineNumber == 13)
+		{
+			$products['4-4']['stock'] = trim(substr($line,23,10));
+		}
+		
+		if($lineNumber == 15)
+		{
+			$firmData['plant_capacity'] = trim(substr($line,52,10));
+			$firmData['plant_value'] = trim(substr($line,63,15));
+		}
+		
+		if($lineNumber == 17)
+		{
+			$firmData['total_assets'] = trim(str_replace("TOTAL ASSETS","",$line));
+		}
+		
+		if($lineNumber == 21)
+		{
+			$firmData['loans'] = trim(str_replace("LOANS","",$line));
+		}
+		
+		
+		$line = strtok( $newLine );
+		
+		//echo $line;
+	}
 }
 
 function CashFlowAnalysysReport($stringToProcess)
